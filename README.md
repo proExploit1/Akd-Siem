@@ -1,4 +1,4 @@
-# 🛡️ SecureWatch SIEM
+# 🛡️ AKD SIEM
 
 نظام مراقبة أمنية كامل مبني على Electron — مثل Wazuh لكن في برنامج واحد.
 
@@ -8,8 +8,8 @@
 
 ```bash
 # 1. نزّل المشروع
-git clone https://github.com/yourname/securewatch-siem
-cd securewatch-siem
+git clone https://github.com/yourname/AKD-siem
+cd AKD-siem
 
 # 2. ثبّت الـ dependencies
 npm install
