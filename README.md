@@ -22,7 +22,7 @@ npm start
 
 ### الخطوة الوحيدة المطلوبة:
 
-1. **افتح SecureWatch** على جهازك الرئيسي
+1. **افتح AKD** على جهازك الرئيسي
 2. اضغط **"Connect Agent"** في القائمة الجانبية
 3. ستظهر IP الخاصة بك تلقائياً (مثال: `ws://192.168.1.10:8765`)
 4. على أي جهاز تريد تراقبه:
@@ -69,7 +69,7 @@ npm run build:mac    # macOS (.dmg)
 ## 📁 هيكل المشروع
 
 ```
-securewatch/
+AKD/
 ├── main.js          ← Electron main + WebSocket server
 ├── preload.js       ← IPC bridge
 ├── src/
