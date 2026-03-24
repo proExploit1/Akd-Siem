@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AKD — Advanced Security Operations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=IBM+Plex+Mono:wght@300;400;500&family=Barlow+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script>
+window.navigate = function(pageId) {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  var btn  = document.querySelector('[data-page="' + pageId + '"]');
+  var page = document.getElementById('page-' + pageId);
+  if (btn)  btn.classList.add('active');
+  if (page) { page.classList.add('active'); page.classList.add('page-enter'); }
+};
+window.showConnectPage = function() { navigate('connect'); };
+</script>
+<style>
+/* ═══════════════════════════════════════════
+   AKD DESIGN SYSTEM — Military Intelligence
+   ═══════════════════════════════════════════ */
+:root {
+  --bg0:      #03070d;
+  --bg1:      #060e17;
+  --bg2:      #081422;
+  --bg3:      #0a1a2e;
+  --surface:  #0d2035;
+  --surface2: #112540;
+  --border:   #1a3a55;
+  --border2:  #1f4a6a;
+
+  --gold:     #e8a020;
+  --gold2:    #c47a10;
+  --gold-dim: #e8a02033;
+  --amber:    #ffb830;
+
+  --cyan:     #00d4ff;
+  --cyan-dim: #00d4ff18;
+  --green:    #00e878;
+  --red:      #ff2040;
+  --orange:   #ff6820;
+  --yellow:   #ffd020;
+  --purple:   #8855ff;
+
+  --text:     #b0cce0;
+  --text2:    #4a7090;
+  --text3:    #2a4560;
+
+  --mono:     'IBM Plex Mono', monospace;
+  --display:  'Orbitron', sans-serif;
+  --ui:       'Barlow Condensed', sans-serif;
+
+  --sidebar-w: 220px;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+html, body {
+  background: var(--bg0);
+  color: var(--text);
+  font-family: var(--ui);
+  font-size: 14px;
+  height: 100vh;
+  overflow: hidden;
+  -webkit-app-region: no-drag;
+}
+
+button, input, a, select, [onclick] { -webkit-app-region: no-drag; }
+
+/* ── Scrollbar ─────────────────────────────── */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ── Noise texture overlay ─────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+/* ═══════════════════════════════════════════
+   TITLEBAR
+   ═══════════════════════════════════════════ */
+#titlebar {
+  -webkit-app-region: drag;
+  height: 48px;
+  background: var(--bg1);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+}
+#titlebar::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold)44, transparent);
+}
+
+.akd-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  -webkit-app-region: no-drag;
+}
+.akd-emblem {
+  width: 32px;
+  height: 32px;
+  position: relative;
+}
+.akd-emblem svg { width: 100%; height: 100%; }
+.akd-wordmark {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+.akd-name {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  text-shadow: 0 0 20px var(--gold)66;
+}
+.akd-tagline {
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: var(--text2);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.tb-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+}
+.tb-spacer { flex: 1; }
+
+/* Server status */
+.tb-server {
+  -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--green);
+  background: #00e87812;
+  border: 1px solid #00e87830;
+  padding: 4px 12px;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+}
+.tb-server .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: breathe 2s ease-in-out infinite;
+}
+
+/* Critical alert pill */
+.tb-alert {
+  -webkit-app-region: no-drag;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--red);
+  background: #ff204012;
+  border: 1px solid #ff204030;
+  padding: 4px 12px;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  animation: alertPulse 1.5s ease-in-out infinite;
+}
+.tb-alert.show { display: flex; }
+
+.tb-clock {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text2);
+  letter-spacing: 0.08em;
+}
+
+/* Window buttons */
+.win-ctrl {
+  -webkit-app-region: no-drag;
+  display: flex;
+  gap: 7px;
+  margin-left: 8px;
+}
+.win-btn {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+.win-btn:hover { filter: brightness(1.3); }
+.win-btn.wc { background: #ff5f57; }
+.win-btn.wm { background: #febb2d; }
+.win-btn.wx { background: #28c840; }
+
+/* ═══════════════════════════════════════════
+   MAIN LAYOUT
+   ═══════════════════════════════════════════ */
+#shell {
+  display: flex;
+  height: calc(100vh - 48px);
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR
+   ═══════════════════════════════════════════ */
+#sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg1);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+  -webkit-app-region: no-drag;
+  position: relative;
+}
+#sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--gold)33, transparent);
+}
+
+.nav-group {
+  padding: 20px 0 8px;
+}
+.nav-group-label {
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: var(--text3);
+  padding: 0 18px 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-group-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 18px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--ui);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  position: relative;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+  text-align: left;
+}
+.nav-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0;
+  background: linear-gradient(90deg, var(--gold)22, transparent);
+  transition: width 0.2s;
+}
+.nav-item:hover {
+  color: var(--text);
+  background: var(--bg2);
+}
+.nav-item:hover::before { width: 100%; }
+.nav-item.active {
+  color: var(--gold);
+  border-left-color: var(--gold);
+  background: var(--gold-dim);
+  font-weight: 600;
+}
+.nav-item.active::before { width: 100%; }
+
+.nav-icon {
+  width: 18px;
+  text-align: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.nav-badge {
+  margin-left: auto;
+  background: var(--red);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 3px;
+  display: none;
+  animation: badgePop 0.3s ease;
+}
+.nav-badge.show { display: block; }
+
+.nav-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 18px;
+}
+
+/* Sidebar bottom metrics */
+.sidebar-metrics {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding: 14px 18px;
+  background: var(--bg0);
+}
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.metric-row:last-child { margin-bottom: 0; }
+.metric-label {
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  color: var(--text3);
+  text-transform: uppercase;
+}
+.metric-val {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--gold);
+}
+.metric-val.ok  { color: var(--green); }
+.metric-val.warn{ color: var(--yellow); }
+
+/* ═══════════════════════════════════════════
+   CONTENT AREA
+   ═══════════════════════════════════════════ */
+#content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  background: var(--bg0);
+  -webkit-app-region: no-drag;
+}
+
+.page { display: none; }
+.page.active { display: block; animation: pageEnter 0.2s ease; }
+
+@keyframes pageEnter {
+  from { opacity:0; transform: translateY(4px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ── Page header ──────────────────────────── */
+.ph {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.ph::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0;
+  width: 60px;
+  height: 1px;
+  background: var(--gold);
+}
+.ph-icon {
+  font-size: 22px;
+  opacity: 0.8;
+}
+.ph-text {}
+.ph-title {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text);
+  line-height: 1;
+}
+.ph-sub {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+.ph-actions { margin-left: auto; display: flex; gap: 8px; }
+
+/* ── Stat cards ────────────────────────────── */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.stat {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  transition: border-color 0.2s;
+}
+.stat:hover { border-color: var(--border2); }
+.stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+}
+.stat.gold::before  { background: var(--gold); box-shadow: 0 0 12px var(--gold)88; }
+.stat.red::before   { background: var(--red);  box-shadow: 0 0 12px var(--red)88; }
+.stat.cyan::before  { background: var(--cyan); box-shadow: 0 0 12px var(--cyan)88; }
+.stat.green::before { background: var(--green);box-shadow: 0 0 12px var(--green)88; }
+.stat.orange::before{ background: var(--orange);box-shadow: 0 0 12px var(--orange)88; }
+.stat.yellow::before{ background: var(--yellow);box-shadow: 0 0 12px var(--yellow)88; }
+
+.stat-bg-icon {
+  position: absolute;
+  right: 12px; top: 8px;
+  font-size: 28px;
+  opacity: 0.06;
+}
+.stat-label {
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  color: var(--text2);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.stat-num {
+  font-family: var(--display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+}
+.stat.gold   .stat-num { color: var(--gold);  text-shadow: 0 0 20px var(--gold)55; }
+.stat.red    .stat-num { color: var(--red);   text-shadow: 0 0 20px var(--red)55; }
+.stat.cyan   .stat-num { color: var(--cyan);  text-shadow: 0 0 20px var(--cyan)55; }
+.stat.green  .stat-num { color: var(--green); text-shadow: 0 0 20px var(--green)55; }
+.stat.orange .stat-num { color: var(--orange);text-shadow: 0 0 20px var(--orange)55; }
+.stat.yellow .stat-num { color: var(--yellow);text-shadow: 0 0 20px var(--yellow)55; }
+.stat-sub { font-size: 10px; color: var(--text2); margin-top: 4px; }
+
+/* ── Panels ────────────────────────────────── */
+.panel {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.panel-head {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg2);
+}
+.panel-head-title {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--text2);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.panel-head-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 6px var(--gold);
+}
+.panel-head-right { margin-left: auto; }
+.panel-body { padding: 16px; }
+
+/* ── Severity badges ────────────────────────── */
+.sev {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+}
+.sev-critical { background: #ff204022; color: var(--red);    border: 1px solid #ff204055; }
+.sev-high     { background: #ff682022; color: var(--orange); border: 1px solid #ff682055; }
+.sev-medium   { background: #ffd02022; color: var(--yellow); border: 1px solid #ffd02055; }
+.sev-low      { background: #00e87822; color: var(--green);  border: 1px solid #00e87855; }
+.sev-info     { background: #00d4ff18; color: var(--cyan);   border: 1px solid #00d4ff44; }
+
+/* ── Data table ─────────────────────────────── */
+.dt { width: 100%; border-collapse: collapse; font-size: 12px; }
+.dt th {
+  text-align: left;
+  padding: 7px 12px;
+  font-size: 8px;
+  color: var(--text2);
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  font-family: var(--ui);
+}
+.dt td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border)55;
+  vertical-align: middle;
+}
+.dt tr:hover td { background: var(--bg2); }
+.dt tr:last-child td { border-bottom: none; }
+
+/* ── Log stream ─────────────────────────────── */
+#log-stream {
+  font-family: var(--mono);
+  font-size: 11px;
+  overflow-y: auto;
+  max-height: calc(100vh - 210px);
+  padding: 4px;
+}
+.lr {
+  display: grid;
+  grid-template-columns: 72px 80px 110px 1fr;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 2px;
+  margin-bottom: 1px;
+  border-left: 2px solid transparent;
+  align-items: start;
+  line-height: 1.4;
+}
+.lr.lc { border-left-color: var(--red);    background: #ff20400a; }
+.lr.lh { border-left-color: var(--orange); background: #ff68200a; }
+.lr.lm { border-left-color: var(--yellow); }
+.lr.ll { border-left-color: var(--green); }
+.lr-ts    { color: var(--text2); }
+.lr-sev   { font-weight: 500; }
+.lr-sev.lc { color: var(--red); }
+.lr-sev.lh { color: var(--orange); }
+.lr-sev.lm { color: var(--yellow); }
+.lr-sev.ll { color: var(--green); }
+.lr-sev.li { color: var(--cyan); }
+.lr-agent { color: var(--gold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lr-msg   { color: var(--text); }
+
+/* ── Agent status indicator ─────────────────── */
+.agent-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.agent-dot.active { background: var(--green); box-shadow: 0 0 8px var(--green); animation: breathe 2s infinite; }
+.agent-dot.disconnected { background: var(--text3); }
+
+/* ── Mini progress bar ──────────────────────── */
+.mbar-wrap { display: inline-flex; align-items: center; gap: 6px; }
+.mbar {
+  width: 56px; height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.mbar-fill { height: 100%; border-radius: 2px; transition: width 0.5s; }
+.mbar-val { font-family: var(--mono); font-size: 10px; color: var(--text2); }
+
+/* ── Buttons ─────────────────────────────────── */
+.btn {
+  padding: 7px 16px;
+  font-family: var(--ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+}
+.btn-gold {
+  background: var(--gold-dim);
+  border-color: var(--gold)66;
+  color: var(--gold);
+}
+.btn-gold:hover { background: var(--gold)33; border-color: var(--gold); }
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border2);
+  color: var(--text2);
+}
+.btn-ghost:hover { background: var(--bg2); color: var(--text); }
+
+/* ── Filter bar ─────────────────────────────── */
+.filter-bar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.filter-input {
+  flex: 1;
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.filter-input:focus { border-color: var(--gold)66; }
+.filter-input::placeholder { color: var(--text3); }
+.fbtn {
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-family: var(--ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.fbtn:hover, .fbtn.on {
+  border-color: var(--gold)66;
+  color: var(--gold);
+  background: var(--gold-dim);
+}
+
+/* ── Threat card ──────────────────────────────── */
+.threat-card {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-left: 3px solid;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  animation: cardIn 0.25s ease;
+}
+.threat-card.critical { border-left-color: var(--red); }
+.threat-card.high     { border-left-color: var(--orange); }
+.threat-card.medium   { border-left-color: var(--yellow); }
+.threat-card.low      { border-left-color: var(--green); }
+.tc-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.tc-rule { font-family: var(--mono); font-size: 10px; color: var(--gold); }
+.tc-name { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+.tc-meta { display: flex; gap: 16px; font-size: 11px; color: var(--text2); flex-wrap: wrap; }
+.tc-meta span { display: flex; align-items: center; gap: 4px; }
+.tc-msg  { font-size: 12px; color: var(--text); margin-bottom: 8px; font-family: var(--mono); }
+
+/* ── FIM card ────────────────────────────────── */
+.fim-card {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-left: 3px solid;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  animation: cardIn 0.25s ease;
+}
+.fim-card.critical { border-left-color: var(--red); }
+.fim-card.high     { border-left-color: var(--orange); }
+.fim-card.medium   { border-left-color: var(--yellow); }
+.fim-path { font-family: var(--mono); font-size: 12px; color: var(--text); margin-bottom: 6px; }
+.fim-meta { display: flex; gap: 16px; font-size: 11px; color: var(--text2); }
+
+/* ── Connect page ────────────────────────────── */
+.ip-card {
+  background: var(--bg0);
+  border: 1px solid var(--gold)44;
+  padding: 12px 16px;
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+}
+.ip-card-lbl { font-size: 8px; letter-spacing: 0.15em; color: var(--text2); margin-bottom: 4px; }
+.ip-card-val { font-family: var(--mono); font-size: 15px; color: var(--gold); font-weight: 500; }
+
+.step {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+.step-n {
+  width: 24px; height: 24px;
+  border: 1px solid var(--gold)55;
+  background: var(--gold-dim);
+  color: var(--gold);
+  font-family: var(--display);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+}
+.step-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.code {
+  background: var(--bg0);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--gold)55;
+  padding: 9px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--green);
+  position: relative;
+  overflow-x: auto;
+  white-space: pre;
+}
+.code .cm { color: var(--text2); }
+.copy-btn {
+  position: absolute;
+  top: 6px; right: 8px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-size: 9px;
+  padding: 3px 7px;
+  cursor: pointer;
+  font-family: var(--ui);
+  letter-spacing: 0.06em;
+  transition: all 0.15s;
+}
+.copy-btn:hover { border-color: var(--gold)66; color: var(--gold); }
+
+/* ── Agent card ──────────────────────────────── */
+.agent-card {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  animation: cardIn 0.25s ease;
+}
+.agent-card.disconnected { border-left-color: var(--text3); opacity: 0.7; }
+.ac-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.ac-name { font-size: 15px; font-weight: 700; color: var(--text); }
+.ac-os   { font-size: 11px; color: var(--text2); }
+.ac-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 10px; }
+.ac-field-lbl { font-size: 8px; letter-spacing: 0.12em; color: var(--text3); text-transform: uppercase; margin-bottom: 3px; }
+.ac-field-val { font-family: var(--mono); font-size: 12px; color: var(--text); }
+.ac-field-val.gold { color: var(--gold); }
+
+/* ── Toast ───────────────────────────────────── */
+#toasts {
+  position: fixed;
+  bottom: 16px; right: 16px;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 6px;
+}
+.toast {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--gold);
+  padding: 12px 16px;
+  max-width: 340px;
+  box-shadow: 0 8px 32px #000a;
+  animation: toastIn 0.3s ease;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+.toast.t-crit  { border-left-color: var(--red); }
+.toast.t-high  { border-left-color: var(--orange); }
+.toast-ttl { font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.toast-body{ font-size: 10px; color: var(--text2); font-family: var(--mono); }
+
+/* ── Empty states ────────────────────────────── */
+.empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text2);
+}
+.empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
+.empty-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.empty-sub { font-size: 12px; }
+
+/* ═══════════════════════════════════════════
+   STATUS BAR (bottom)
+   ═══════════════════════════════════════════ */
+#statusbar {
+  height: 24px;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 24px;
+  flex-shrink: 0;
+  -webkit-app-region: no-drag;
+}
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text2);
+  letter-spacing: 0.06em;
+}
+.sb-item .val { color: var(--gold); }
+.sb-sep { width: 1px; height: 12px; background: var(--border); }
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════ */
+@keyframes breathe   { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+@keyframes alertPulse{ 0%,100%{opacity:1} 50%{opacity:.5} }
+@keyframes cardIn    { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
+@keyframes toastIn   { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:none} }
+@keyframes badgePop  { from{transform:scale(0)} 70%{transform:scale(1.3)} to{transform:scale(1)} }
+
+/* hex grid background for dashboard */
+.hex-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34z' fill='none' stroke='%231a3a5520' stroke-width='0.5'/%3E%3Cpath d='M28 100L0 84V50l28-16 28 16v34z' fill='none' stroke='%231a3a5520' stroke-width='0.5'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+#page-dashboard { position: relative; }
+#page-dashboard > * { position: relative; z-index: 1; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ TITLEBAR ═══════════════════════ -->
+<div id="titlebar">
+  <div class="akd-logo">
+    <div class="akd-emblem">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="16,2 30,9 30,23 16,30 2,23 2,9" fill="#e8a02012" stroke="#e8a02066" stroke-width="1"/>
+        <polygon points="16,6 26,11 26,21 16,26 6,21 6,11" fill="none" stroke="#e8a02044" stroke-width="0.5"/>
+        <text x="16" y="21" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="10" font-weight="900" fill="#e8a020">A</text>
+      </svg>
+    </div>
+    <div class="akd-wordmark">
+      <div class="akd-name">AKD</div>
+      <div class="akd-tagline">Security Operations Center</div>
+    </div>
+  </div>
+
+  <div class="tb-sep"></div>
+
+  <div class="tb-spacer"></div>
+
+  <div class="tb-server">
+    <span class="dot"></span>
+    <span id="tb-srv">SERVER :8765</span>
+  </div>
+
+  <div class="tb-alert" id="tb-alert">
+    <span>⚠</span>
+    <span id="tb-alert-txt">0 CRITICAL</span>
+  </div>
+
+  <div class="tb-clock" id="tb-clock">00:00:00</div>
+
+  <div class="win-ctrl">
+    <button class="win-btn wm" onclick="window.siem?.minimize()"></button>
+    <button class="win-btn wx" onclick="window.siem?.maximize()"></button>
+    <button class="win-btn wc" onclick="window.siem?.close()"></button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SHELL ═══════════════════════ -->
+<div id="shell">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="nav-group">
+      <div class="nav-group-label">Monitor</div>
+      <button class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+        <span class="nav-icon">◈</span> Dashboard
+      </button>
+      <button class="nav-item" data-page="events" onclick="navigate('events')">
+        <span class="nav-icon">▤</span> Live Events
+        <span class="nav-badge" id="badge-ev">0</span>
+      </button>
+      <button class="nav-item" data-page="threats" onclick="navigate('threats')">
+        <span class="nav-icon">⬡</span> Threats
+        <span class="nav-badge" id="badge-th">0</span>
+      </button>
+      <button class="nav-item" data-page="fim" onclick="navigate('fim')">
+        <span class="nav-icon">⊞</span> Integrity
+        <span class="nav-badge" id="badge-fim">0</span>
+      </button>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-group">
+      <div class="nav-group-label">Management</div>
+      <button class="nav-item" data-page="agents" onclick="navigate('agents')">
+        <span class="nav-icon">⬡</span> Agents
+      </button>
+      <button class="nav-item" data-page="connect" onclick="navigate('connect')">
+        <span class="nav-icon">⊕</span> Connect Agent
+      </button>
+    </div>
+
+    <div class="sidebar-metrics">
+      <div class="metric-row">
+        <span class="metric-label">Events Ingested</span>
+        <span class="metric-val" id="sb-ev">0</span>
+      </div>
+      <div class="metric-row">
+        <span class="metric-label">Active Agents</span>
+        <span class="metric-val ok" id="sb-ag">0/0</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <div style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+    <main id="content">
+
+    <!-- ══════════ DASHBOARD ══════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="hex-bg"></div>
+
+      <div class="ph">
+        <span class="ph-icon">◈</span>
+        <div class="ph-text">
+          <div class="ph-title">DASHBOARD</div>
+          <div class="ph-sub">Real-time threat intelligence overview</div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat gold">
+          <div class="stat-bg-icon">▤</div>
+          <div class="stat-label">Total Events</div>
+          <div class="stat-num" id="st-total">0</div>
+          <div class="stat-sub">All ingested</div>
+        </div>
+        <div class="stat red">
+          <div class="stat-bg-icon">⚠</div>
+          <div class="stat-label">Critical</div>
+          <div class="stat-num" id="st-crit">0</div>
+          <div class="stat-sub">Immediate action</div>
+        </div>
+        <div class="stat orange">
+          <div class="stat-bg-icon">⬡</div>
+          <div class="stat-label">Threats</div>
+          <div class="stat-num" id="st-thr">0</div>
+          <div class="stat-sub">Rules triggered</div>
+        </div>
+        <div class="stat yellow">
+          <div class="stat-bg-icon">⊞</div>
+          <div class="stat-label">FIM Alerts</div>
+          <div class="stat-num" id="st-fim">0</div>
+          <div class="stat-sub">File changes</div>
+        </div>
+        <div class="stat green">
+          <div class="stat-bg-icon">⬡</div>
+          <div class="stat-label">Active Agents</div>
+          <div class="stat-num" id="st-ag">0</div>
+          <div class="stat-sub">Reporting live</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-dot"></span>
+          <span class="panel-head-title">Recent Events — Last 30</span>
+        </div>
+        <div id="dash-feed" style="font-family:var(--mono);font-size:11px;padding:6px;overflow-y:auto;max-height:260px;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-dot"></span>
+          <span class="panel-head-title">Connected Agents</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="dt">
+            <thead><tr>
+              <th></th><th>Agent ID</th><th>IP Address</th><th>OS</th>
+              <th>CPU</th><th>Memory</th><th>Last Seen</th>
+            </tr></thead>
+            <tbody id="dash-agents"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ LIVE EVENTS ══════════ -->
+    <div class="page" id="page-events">
+      <div class="ph">
+        <span class="ph-icon">▤</span>
+        <div class="ph-text">
+          <div class="ph-title">LIVE EVENTS</div>
+          <div class="ph-sub" id="ev-count">0 events ingested</div>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-ghost" onclick="clearEvents()">Clear</button>
+          <button class="btn btn-ghost" id="autoscroll-btn" onclick="toggleAutoScroll()">⬇ Auto ON</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input class="filter-input" id="log-search" placeholder="Filter by message, IP, agent ID..." oninput="filterLogs()"/>
+        <button class="fbtn on"  data-sev="ALL"      onclick="setSev(this,'ALL')">ALL</button>
+        <button class="fbtn"     data-sev="critical" onclick="setSev(this,'critical')">CRIT</button>
+        <button class="fbtn"     data-sev="high"     onclick="setSev(this,'high')">HIGH</button>
+        <button class="fbtn"     data-sev="medium"   onclick="setSev(this,'medium')">MED</button>
+        <button class="fbtn"     data-sev="fim"      onclick="setSev(this,'fim')">FIM</button>
+      </div>
+      <div class="panel">
+        <div id="log-stream"></div>
+      </div>
+    </div>
+
+    <!-- ══════════ THREATS ══════════ -->
+    <div class="page" id="page-threats">
+      <div class="ph">
+        <span class="ph-icon">⬡</span>
+        <div class="ph-text">
+          <div class="ph-title">THREAT DETECTIONS</div>
+          <div class="ph-sub">Rule-based alerts from connected agents</div>
+        </div>
+      </div>
+      <div id="threats-list">
+        <div class="empty">
+          <div class="empty-icon">⬡</div>
+          <div class="empty-title">No threats detected</div>
+          <div class="empty-sub">Agents will report when detection rules trigger</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ FILE INTEGRITY ══════════ -->
+    <div class="page" id="page-fim">
+      <div class="ph">
+        <span class="ph-icon">⊞</span>
+        <div class="ph-text">
+          <div class="ph-title">FILE INTEGRITY MONITOR</div>
+          <div class="ph-sub">Cryptographic hash verification of critical system files</div>
+        </div>
+      </div>
+      <div id="fim-list">
+        <div class="empty">
+          <div class="empty-icon">⊞</div>
+          <div class="empty-title">No integrity events</div>
+          <div class="empty-sub">FIM agent checks files every 30 seconds</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ AGENTS ══════════ -->
+    <div class="page" id="page-agents">
+      <div class="ph">
+        <span class="ph-icon">⬡</span>
+        <div class="ph-text">
+          <div class="ph-title">AGENT MANAGEMENT</div>
+          <div class="ph-sub">Connected endpoint monitoring agents</div>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-gold" onclick="navigate('connect')">+ Connect Agent</button>
+        </div>
+      </div>
+      <div id="agents-list">
+        <div class="empty">
+          <div class="empty-icon">⬡</div>
+          <div class="empty-title">No agents connected</div>
+          <div class="empty-sub">Deploy the agent script on any machine to begin monitoring</div>
+          <br>
+          <button class="btn btn-gold" onclick="navigate('connect')">Connect First Agent →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ CONNECT AGENT ══════════ -->
+    <div class="page" id="page-connect">
+      <div class="ph">
+        <span class="ph-icon">⊕</span>
+        <div class="ph-text">
+          <div class="ph-title">CONNECT AN AGENT</div>
+          <div class="ph-sub">Deploy monitoring on any Linux or Windows machine</div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-head">
+          <span class="panel-head-dot"></span>
+          <span class="panel-head-title">AKD Server Address — Share with Agent</span>
+        </div>
+        <div class="panel-body" id="ip-section"></div>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-head">
+          <span class="panel-head-dot"></span>
+          <span class="panel-head-title">Linux / macOS Deployment</span>
+        </div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:14px">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div>
+              <div class="step-title">Install Python dependencies</div>
+              <div class="code">pip install websockets psutil<button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-n">2</div>
+            <div>
+              <div class="step-title">Extract agent script</div>
+              <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Click to extract <code style="color:var(--gold)">siem_agent.py</code> to an accessible folder:</div>
+              <button class="btn btn-gold" onclick="window.siem?.openAgentFolder()">📂 Open Agent Folder</button>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-n">3</div>
+            <div>
+              <div class="step-title">Edit line 14 — set your server IP</div>
+              <div class="code"><span class="cm"># Change to your AKD server IP:</span>
+SIEM_SERVER = "ws://<span id="inline-ip" style="color:var(--amber)">YOUR_IP</span>:8765"<button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-n">4</div>
+            <div>
+              <div class="step-title">Run agent (sudo required for log access)</div>
+              <div class="code">sudo python3 siem_agent.py<button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-n">5</div>
+            <div>
+              <div class="step-title">Optional: Run as systemd service</div>
+              <div class="code"><span class="cm"># /etc/systemd/system/akd-agent.service</span>
+[Unit]
+Description=AKD Security Agent
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /opt/siem_agent.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target<button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+              <div class="code" style="margin-top:6px">sudo systemctl enable --now akd-agent<button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-head-dot"></span>
+          <span class="panel-head-title">Windows Deployment</span>
+        </div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:14px">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div>
+              <div class="step-title">Install dependencies (PowerShell as Administrator)</div>
+              <div class="code">pip install websockets psutil<button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-n">2</div>
+            <div>
+              <div class="step-title">Extract and run agent</div>
+              <div class="code">python siem_agent.py<button class="copy-btn" onclick="copyCode(this)">COPY</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </main>
+
+    <!-- STATUS BAR -->
+    <div id="statusbar">
+      <div class="sb-item">AKD <span class="val">v1.0</span></div>
+      <div class="sb-sep"></div>
+      <div class="sb-item">WS PORT <span class="val">8765</span></div>
+      <div class="sb-sep"></div>
+      <div class="sb-item">EVENTS <span class="val" id="sbar-ev">0</span></div>
+      <div class="sb-sep"></div>
+      <div class="sb-item">AGENTS <span class="val" id="sbar-ag">0/0</span></div>
+      <div class="sb-sep"></div>
+      <div class="sb-item" id="sbar-last">LAST EVENT <span class="val">—</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div id="toasts"></div>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════ -->
+<script>
+// ── State ─────────────────────────────────────
+const S = {
+  events: [], agents: {}, serverIPs: [],
+  total:0, crits:0, threats:0, fims:0,
+  sevFilter:'ALL', autoScroll:true,
+};
+
+// ── Clock ──────────────────────────────────────
+setInterval(() => {
+  document.getElementById('tb-clock').textContent = new Date().toTimeString().slice(0,8);
+}, 1000);
+
+// ── Helpers ────────────────────────────────────
+function sev(s) {
+  return `<span class="sev sev-${s||'info'}">${s||'info'}</span>`;
+}
+function mbar(pct, color) {
+  return `<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:${pct}%;background:${color}"></div></div><span class="mbar-val">${pct}%</span></div>`;
+}
+function cpuClr(p)  { return p>80?'var(--red)':p>60?'var(--yellow)':'var(--green)'; }
+function memClr(p)  { return p>90?'var(--red)':p>75?'var(--yellow)':'var(--cyan)'; }
+
+// ── Toast ──────────────────────────────────────
+function toast(title, body, cls='') {
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast ' + cls;
+  t.innerHTML = `<div class="toast-ttl">${title}</div><div class="toast-body">${body||''}</div>`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 5000);
+}
+
+// ── Copy button ────────────────────────────────
+function copyCode(btn) {
+  const block = btn.closest('.code');
+  const txt = block.innerText.replace(/COPY\s*$/,'').trim();
+  navigator.clipboard.writeText(txt).catch(()=>{});
+  btn.textContent = '✓ DONE';
+  setTimeout(() => btn.textContent = 'COPY', 1600);
+}
+
+// ── Update all stats ───────────────────────────
+function updateStats() {
+  document.getElementById('st-total').textContent = S.total;
+  document.getElementById('st-crit').textContent  = S.crits;
+  document.getElementById('st-thr').textContent   = S.threats;
+  document.getElementById('st-fim').textContent   = S.fims;
+  const active = Object.values(S.agents).filter(a=>a.status==='active').length;
+  const total  = Object.keys(S.agents).length;
+  document.getElementById('st-ag').textContent    = active;
+  document.getElementById('sb-ev').textContent    = S.total;
+  document.getElementById('sb-ag').textContent    = `${active}/${total}`;
+  document.getElementById('sbar-ev').textContent  = S.total;
+  document.getElementById('sbar-ag').textContent  = `${active}/${total}`;
+  document.getElementById('ev-count').textContent = `${S.total} events ingested`;
+  // titlebar
+  if (S.crits > 0) {
+    document.getElementById('tb-alert').classList.add('show');
+    document.getElementById('tb-alert-txt').textContent = `${S.crits} CRITICAL`;
+  }
+}
+
+// ── Render agents ──────────────────────────────
+function renderAgents() {
+  const list   = Object.values(S.agents);
+  const tbody  = document.getElementById('dash-agents');
+  const fullEl = document.getElementById('agents-list');
+  var cpuC = function(p){ return p>80?'var(--red)':p>60?'var(--yellow)':'var(--green)'; };
+  var memC = function(p){ return p>90?'var(--red)':p>75?'var(--yellow)':'var(--cyan)'; };
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty" style="padding:20px">No agents connected</td></tr>`;
+    fullEl.innerHTML = `<div class="empty"><div class="empty-icon">⬡</div><div class="empty-title">No agents connected</div><button class="btn btn-gold" style="margin-top:12px" onclick="navigate('connect')">Connect Agent →</button></div>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map(a => `<tr>
+    <td><span class="agent-dot ${a.status}"></span></td>
+    <td style="font-family:var(--mono);color:var(--gold)">${a.agent_id}</td>
+    <td style="font-family:var(--mono)">${a.ip}</td>
+    <td style="color:var(--text2)">${a.os}</td>
+    <td>${mbar(a.cpu||0, cpuC(a.cpu||0))}</td>
+    <td>${mbar(a.mem||0, memC(a.mem||0))}</td>
+    <td style="color:var(--text2);font-size:11px;font-family:var(--mono)">${a.last_seen||'—'}</td>
+  </tr>`).join('');
+
+  fullEl.innerHTML = list.map(a => `
+    <div class="agent-card ${a.status==='active'?'':'disconnected'}">
+      <div class="ac-head">
+        <span class="agent-dot ${a.status}"></span>
+        <span class="ac-name">${a.agent_id}</span>
+        <span class="ac-os">${a.os}${a.platform?' — '+a.platform.split(' ')[0]:''}</span>
+        <span style="margin-left:auto">${sev(a.status==='active'?'low':'medium')}</span>
+      </div>
+      <div class="ac-grid">
+        <div><div class="ac-field-lbl">IP Address</div><div class="ac-field-val gold">${a.ip}</div></div>
+        <div><div class="ac-field-lbl">Connected</div><div class="ac-field-val">${a.connected_at||'—'}</div></div>
+        <div><div class="ac-field-lbl">Last Seen</div><div class="ac-field-val">${a.last_seen||'—'}</div></div>
+        <div><div class="ac-field-lbl">Version</div><div class="ac-field-val">${a.version||'1.0'}</div></div>
+      </div>
+      <div style="display:flex;gap:20px;font-size:12px">
+        <span>CPU ${mbar(a.cpu||0, cpuC(a.cpu||0))}</span>
+        <span>MEM ${mbar(a.mem||0, memC(a.mem||0))}</span>
+        <span>DISK ${mbar(a.disk||0,'var(--purple)')}</span>
+        <span style="color:var(--text2);font-family:var(--mono);font-size:11px">CONN: <span style="color:var(--gold)">${a.connections||0}</span></span>
+      </div>
+    </div>`).join('');
+}
+
+// ── Render event row ───────────────────────────
+function evRow(e) {
+  var s = e.severity||'info';
+  var cls = {critical:'lc',high:'lh',medium:'lm',low:'ll'}[s]||'li';
+  return `<div class="lr ${cls}">
+    <span class="lr-ts">${e.timestamp||''}</span>
+    <span class="lr-sev ${cls}">[${s.toUpperCase()}]</span>
+    <span class="lr-agent">${e.agent_id||'—'}</span>
+    <span class="lr-msg">${(e.message||'').slice(0,160)}</span>
+  </div>`;
+}
+
+// ── Dashboard feed ─────────────────────────────
+function updateDashFeed() {
+  const feed = document.getElementById('dash-feed');
+  feed.innerHTML = [...S.events].slice(-30).reverse().map(evRow).join('');
+}
+
+// ── Log stream ─────────────────────────────────
+var sevFilter = 'ALL';
+function setSev(btn, s) {
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  sevFilter = s;
+  rerenderStream();
+}
+function filterLogs() { rerenderStream(); }
+function rerenderStream() {
+  var search = document.getElementById('log-search').value.toLowerCase();
+  var stream = document.getElementById('log-stream');
+  var filtered = S.events.filter(e => {
+    if (sevFilter !== 'ALL') {
+      if (sevFilter === 'fim'     && e.type !== 'fim')         return false;
+      if (sevFilter !== 'fim'     && e.severity !== sevFilter) return false;
+    }
+    if (search) {
+      var txt = ((e.message||'')+(e.agent_id||'')+(e.source_ip||'')).toLowerCase();
+      if (!txt.includes(search)) return false;
+    }
+    return true;
+  });
+  stream.innerHTML = filtered.map(evRow).join('');
+  if (S.autoScroll) stream.scrollTop = stream.scrollHeight;
+}
+function clearEvents() {
+  S.events=[]; S.total=0; rerenderStream(); updateStats();
+}
+function toggleAutoScroll() {
+  S.autoScroll = !S.autoScroll;
+  var btn = document.getElementById('autoscroll-btn');
+  btn.textContent = S.autoScroll ? '⬇ Auto ON' : '⏸ Auto OFF';
+  btn.classList.toggle('on', S.autoScroll);
+}
+
+// ── Add threat card ────────────────────────────
+function addThreat(e) {
+  var list = document.getElementById('threats-list');
+  if (list.querySelector('.empty')) list.innerHTML = '';
+  var card = document.createElement('div');
+  card.className = 'threat-card ' + (e.severity||'info');
+  card.innerHTML = `
+    <div class="tc-top">
+      <span class="tc-rule">${e.rule_id||e.type}</span>
+      <span class="tc-name">${e.rule_name||'Alert'}</span>
+      ${sev(e.severity)}
+    </div>
+    <div class="tc-msg">${(e.message||'').slice(0,180)}</div>
+    <div class="tc-meta">
+      ${e.agent_id   ? `<span>⬡ ${e.agent_id}</span>` : ''}
+      ${e.source_ip  ? `<span style="color:var(--orange)">⚠ ${e.source_ip}</span>` : ''}
+      ${e.timestamp  ? `<span>◷ ${e.timestamp}</span>` : ''}
+      ${e.log_source ? `<span>▤ ${e.log_source}</span>` : ''}
+    </div>`;
+  list.insertBefore(card, list.firstChild);
+  while (list.children.length > 100) list.removeChild(list.lastChild);
+}
+
+// ── Add FIM card ───────────────────────────────
+function addFIM(e) {
+  var list = document.getElementById('fim-list');
+  if (list.querySelector('.empty')) list.innerHTML = '';
+  var stClr = {modified:'var(--orange)',added:'var(--yellow)',deleted:'var(--red)'}[e.status]||'var(--green)';
+  var card = document.createElement('div');
+  card.className = 'fim-card ' + (e.severity||'medium');
+  card.innerHTML = `
+    <div class="fim-path">${e.path||'Unknown path'}</div>
+    <div class="fim-meta">
+      <span>Status: <span style="color:${stClr};font-weight:700;text-transform:uppercase">${e.status}</span></span>
+      ${e.hash_old ? `<span>OLD: <span style="font-family:var(--mono);color:var(--gold)">${e.hash_old}</span></span>` : ''}
+      ${e.hash_new ? `<span>NEW: <span style="font-family:var(--mono);color:var(--orange)">${e.hash_new}</span></span>` : ''}
+      <span>Agent: ${e.agent_id||'—'}</span>
+      ${e.timestamp ? `<span>◷ ${e.timestamp}</span>` : ''}
+    </div>`;
+  list.insertBefore(card, list.firstChild);
+}
+
+// ── Handle SIEM event ──────────────────────────
+function handleEvent(e) {
+  if (!e.timestamp) e.timestamp = new Date().toLocaleTimeString();
+
+  if (e.type === 'agent_connected') {
+    S.agents[e.agent_id] = {...e, status:'active', cpu:0, mem:0, disk:0};
+    renderAgents(); updateStats();
+    toast('⬡ Agent Connected', `${e.agent_id} — ${e.ip}`);
+    return;
+  }
+  if (e.type === 'agent_disconnected') {
+    if (S.agents[e.agent_id]) S.agents[e.agent_id].status = 'disconnected';
+    renderAgents(); updateStats();
+    toast('⚠ Agent Disconnected', e.agent_id, 't-high');
+    return;
+  }
+  if (e.type === 'agent_heartbeat') {
+    if (S.agents[e.agent_id]) {
+      Object.assign(S.agents[e.agent_id], {
+        cpu:e.cpu, mem:e.mem, disk:e.disk,
+        connections:e.connections, last_seen:e.last_seen, status:'active'
+      });
+      renderAgents(); updateStats();
+    }
+    return;
+  }
+
+  // Normal event
+  S.events.push(e);
+  if (S.events.length > 10000) S.events.shift();
+  S.total++;
+
+  if (e.severity === 'critical') {
+    S.crits++;
+    toast(`🚨 CRITICAL — ${e.agent_id}`, (e.message||'').slice(0,80), 't-crit');
+  }
+  if (e.type === 'threat') {
+    S.threats++;
+    addThreat(e);
+    var b = document.getElementById('badge-th');
+    b.textContent = S.threats; b.classList.add('show');
+  }
+  if (e.type === 'fim') {
+    S.fims++;
+    addFIM(e);
+    var bf = document.getElementById('badge-fim');
+    bf.textContent = S.fims; bf.classList.add('show');
+  }
+
+  // Update last event in status bar
+  document.getElementById('sbar-last').innerHTML =
+    `LAST EVENT <span class="val" style="color:${e.severity==='critical'?'var(--red)':e.severity==='high'?'var(--orange)':'var(--gold)'}">${e.agent_id||'—'}</span>`;
+
+  updateStats();
+  updateDashFeed();
+
+  // Live stream append
+  var s = e.severity||'info';
+  var search = document.getElementById('log-search').value.toLowerCase();
+  var matchSev = sevFilter==='ALL' || (sevFilter==='fim'?e.type==='fim':s===sevFilter);
+  var matchTxt = !search || ((e.message||'')+(e.agent_id||'')).toLowerCase().includes(search);
+  if (matchSev && matchTxt) {
+    var stream = document.getElementById('log-stream');
+    stream.insertAdjacentHTML('beforeend', evRow(e));
+    if (S.autoScroll) stream.scrollTop = stream.scrollHeight;
+    while (stream.children.length > 500) stream.removeChild(stream.firstChild);
+  }
+}
+
+// ── Init ───────────────────────────────────────
+async function init() {
+  if (!window.siem) {
+    document.getElementById('tb-srv').textContent = 'STANDALONE';
+    return;
+  }
+
+  const st = await window.siem.getState();
+
+  // IPs section
+  const ips = st.serverInfo?.ips || [];
+  S.serverIPs = ips;
+  const ipSec = document.getElementById('ip-section');
+  if (ips.length) {
+    ipSec.innerHTML = ips.map(ip =>
+      `<div class="ip-card">
+        <div class="ip-card-lbl">WEBSOCKET ADDRESS</div>
+        <div class="ip-card-val">ws://${ip}:8765</div>
+       </div>`
+    ).join('');
+    var inlineIp = document.getElementById('inline-ip');
+    if (inlineIp) inlineIp.textContent = ips[0];
+  } else {
+    ipSec.innerHTML = '<div style="color:var(--text2);font-size:12px">No network interfaces found</div>';
+  }
+
+  // Restore state
+  (st.agents||[]).forEach(a => { S.agents[a.agent_id] = a; });
+  renderAgents();
+  (st.events||[]).forEach(e => handleEvent(e));
+
+  // Live events
+  window.siem.onEvent(handleEvent);
+
+  document.getElementById('tb-srv').textContent = `SERVER :${st.serverInfo?.port||8765}`;
+}
+
+init();
+</script>
+</body>
+</html>

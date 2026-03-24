@@ -1,0 +1,51 @@
+{
+  "name": "akd-siem",
+  "version": "1.0.0",
+  "description": "AKD — Advanced Security Operations Center",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build:mac": "electron-builder --mac"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "electron": "^29.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.akd.siem",
+    "productName": "AKD SIEM",
+    "icon": "assets/icon",
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**",
+      "agent/**",
+      "assets/**",
+      "node_modules/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "AKD SIEM"
+    },
+    "asarUnpack": [
+      "agent/**"
+    ]
+  }
+}
